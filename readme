@@ -1,0 +1,5 @@
+> npm install express cors cookie-parser jsonwebtoken
+
+npm start ou node server.js
+
+

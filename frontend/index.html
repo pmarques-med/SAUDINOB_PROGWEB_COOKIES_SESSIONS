@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cookie vs Bearer</title>
+</head>
+
+<body>
+
+  <h1>Cookie vs Authorization Bearer</h1>
+
+
+  <h2>1. Autenticação com Cookie</h2>
+
+  <button onclick="loginCookie()">
+    Login com Cookie
+  </button>
+
+  <button onclick="profileCookie()">
+    Pedir Profile
+  </button>
+
+
+  <h2>2. Autenticação com Bearer</h2>
+
+  <button onclick="loginBearer()">
+    Login com Bearer
+  </button>
+
+  <button onclick="profileBearer()">
+    Pedir Profile
+  </button>
+
+
+  <h2>Resposta</h2>
+
+  <pre id="output"></pre>
+
+
+<script>
+
+const API = "http://localhost:3000";
+
+let token;
+
+
+// ----------------------------------------------------
+// COOKIE
+// ----------------------------------------------------
+
+async function loginCookie() {
+
+  const response = await fetch(API + "/login-cookie", {
+    method: "POST",
+
+    // permite receber/enviar cookies entre origins
+    credentials: "include"
+  });
+
+  const data = await response.json();
+
+  mostrar(data);
+}
+
+
+async function profileCookie() {
+
+  const response = await fetch(API + "/profile-cookie", {
+
+    // Não colocamos o token!
+    // O browser envia o cookie automaticamente.
+
+    credentials: "include"
+  });
+
+  const data = await response.json();
+
+  mostrar(data);
+}
+
+
+// ----------------------------------------------------
+// BEARER
+// ----------------------------------------------------
+
+async function loginBearer() {
+
+  const response = await fetch(API + "/login-bearer", {
+    method: "POST"
+  });
+
+  const data = await response.json();
+
+  // Agora é a aplicação que guarda o token
+
+  token = data.token;
+
+  mostrar(data);
+}
+
+
+async function profileBearer() {
+
+  const response = await fetch(API + "/profile-bearer", {
+
+    // A aplicação adiciona explicitamente o token
+
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+
+  });
+
+  const data = await response.json();
+
+  mostrar(data);
+}
+
+
+// ----------------------------------------------------
+
+function mostrar(data) {
+
+  document.querySelector("#output").textContent =
+    JSON.stringify(data, null, 2);
+}
+
+</script>
+
+</body>
+</html>
