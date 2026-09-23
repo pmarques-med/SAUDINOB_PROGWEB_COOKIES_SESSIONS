@@ -60,9 +60,12 @@ app.post("/login-cookie", (req, res) => {
   const token = criarToken();
 
   res.cookie("token", token, {
-    httpOnly: true,
+    httpOnly: true, // impede que o cookie seja acedido via JavaScript no browser
     sameSite: "lax"
   });
+
+  res.cookie("theme", "dark", { maxAge: 365 * 24 * 60 * 60 * 1000});
+
 
   res.json({
     message: "Login efetuado. Token guardado num cookie."

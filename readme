@@ -2,4 +2,18 @@
 
 npm start ou node server.js
 
+Exercício:
+
+1. Verificar quais as cookies acessíveis ao JavaScript antes do login.
+2. Efetuar o login com cookies e verificar novamente quais as cookies acessíveis ao JavaScript.
+    O que mudou?
+3. Alterar o atributo httpOnly da cookie sessionId no servidor e repetir o login.
+    O que muda? Porquê?
+4. Criar o código necessário (frontend e backend) para permitir ao utilizador escolher e manter a preferência de idioma utilizando uma cookie.
+5. Eliminar o maxAge da cookie theme. Fechar completamente o browser, voltar a abri-lo e verificar o que aconteceu.
+    Qual é a diferença entre uma cookie com e sem maxAge?
+6. No DevTools, apagar a cookie sessionId e, sem efetuar logout, tentar novamente obter o profile.
+    O que acontece? Porquê?
+7. Alterar a aplicação para que a preferência de tema deixe de ser guardada numa cookie e passe a ser guardada apenas no frontend, utilizando localStorage.
+
 

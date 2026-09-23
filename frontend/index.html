@@ -21,6 +21,10 @@
     Pedir Profile
   </button>
 
+  <button onclick="verCookies()">
+    Ver cookies acessíveis ao JavaScript
+  </button>
+
 
   <h2>2. Autenticação com Bearer</h2>
 
@@ -54,7 +58,7 @@ async function loginCookie() {
   const response = await fetch(API + "/login-cookie", {
     method: "POST",
 
-    // permite receber/enviar cookies entre origins
+    // Apenas necessário quando o front-end está num domínio diferente do back-end.
     credentials: "include"
   });
 
@@ -71,7 +75,7 @@ async function profileCookie() {
     // Não colocamos o token!
     // O browser envia o cookie automaticamente.
 
-    credentials: "include"
+    credentials: "include" // Apenas necessário quando o front-end está num domínio diferente do back-end.
   });
 
   const data = await response.json();
@@ -124,6 +128,26 @@ function mostrar(data) {
 
   document.querySelector("#output").textContent =
     JSON.stringify(data, null, 2);
+}
+
+function verCookies() {
+
+  const cookies = document.cookie;
+
+  if (cookies) {
+
+    document.querySelector("#output").textContent =
+
+      "Cookies visíveis ao JavaScript: " + cookies;
+
+  } else {
+
+    document.querySelector("#output").textContent =
+
+      "Não existem cookies acessíveis ao JavaScript.";
+
+  }
+
 }
 
 </script>
