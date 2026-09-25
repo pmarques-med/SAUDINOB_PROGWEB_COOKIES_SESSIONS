@@ -57,6 +57,7 @@ function criarToken() {
 
 app.post("/login-cookie", (req, res) => {
 
+  console.log("Login efetuado. Criando cookie com JWT...");
   const token = criarToken();
 
   res.cookie("token", token, {
@@ -83,6 +84,7 @@ app.get("/profile-cookie", (req, res) => {
     return res.status(401).json({
       error: "Cookie não encontrado"
     });
+    console.log("Pedido sem Cookie não encontrado");
   }
 
   try {

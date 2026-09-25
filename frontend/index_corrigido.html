@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cookie vs Bearer</title>
+</head>
+
+<body>
+
+  <h1>Cookie vs Authorization Bearer</h1>
+
+
+  <h2>1. Autenticação com Cookie</h2>
+
+  <button onclick="loginCookie()">
+    Login com Cookie
+  </button>
+
+  <button onclick="profileCookie()">
+    Pedir Profile
+  </button>
+
+  <button onclick="verCookies()">
+    Ver cookies acessíveis ao JavaScript
+  </button>
+
+
+  <h2>2. Autenticação com Bearer</h2>
+
+  <button onclick="loginBearer()">
+    Login com Bearer
+  </button>
+
+  <button onclick="profileBearer()">
+    Pedir Profile
+  </button>
+
+  <button onclick="verToken()">
+
+  Ver conteúdo do JWT
+
+</button>
+
+
+  <h2>3. Preferência de idioma</h2>
+
+  <label for="idioma">Idioma:</label>
+
+  <select id="idioma" onchange="guardarIdioma()">
+    <option value="pt">Português</option>
+    <option value="en">English</option>
+    <option value="es">Español</option>
+  </select>
+
+
+  <h2>Resposta</h2>
+
+  <pre id="output"></pre>
+
+
+<script>
+
+const API = "http://localhost:3000";
+
+let token;
+
+
+// ----------------------------------------------------
+// COOKIE
+// ----------------------------------------------------
+
+async function loginCookie() {
+
+  const response = await fetch(API + "/login-cookie", {
+    method: "POST",
+
+    // Necessário quando o frontend está num origin
+    // diferente do backend.
+    credentials: "include"
+  });
+
+  const data = await response.json();
+
+  mostrar(data);
+}
+
+
+async function profileCookie() {
+
+  const response = await fetch(API + "/profile-cookie", {
+
+    // Não colocamos o token!
+    // O browser envia as cookies automaticamente.
+    credentials: "include"
+  });
+
+  const data = await response.json();
+
+  mostrar(data);
+}
+
+
+// ----------------------------------------------------
+// BEARER
+// ----------------------------------------------------
+
+async function loginBearer() {
+
+  const response = await fetch(API + "/login-bearer", {
+    method: "POST"
+  });
+
+  const data = await response.json();
+
+  // Neste caso é a aplicação que guarda o token.
+  token = data.token;
+
+  mostrar(data);
+}
+
+
+async function profileBearer() {
+
+  const response = await fetch(API + "/profile-bearer", {
+
+    // A aplicação adiciona explicitamente o token.
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+
+  });
+
+  const data = await response.json();
+
+  mostrar(data);
+}
+
+
+// ----------------------------------------------------
+// PREFERÊNCIA DE IDIOMA
+// ----------------------------------------------------
+
+function guardarIdioma() {
+
+  const idioma = document.querySelector("#idioma").value;
+
+  // Criar/atualizar a cookie no próprio browser.
+  // A cookie fica guardada durante 1 ano.
+  document.cookie =
+    "idioma=" + idioma +
+    "; Max-Age=31536000; Path=/; SameSite=Lax";
+
+  mostrar({
+    message: "Preferência de idioma guardada",
+    idioma: idioma
+  });
+}
+
+
+// Procurar uma cookie pelo nome.
+
+function obterCookie(nome) {
+
+  const cookies = document.cookie.split("; ");
+
+  for (const cookie of cookies) {
+
+    const [nomeCookie, valor] = cookie.split("=");
+
+    if (nomeCookie === nome) {
+      return valor;
+    }
+  }
+
+  return null;
+}
+
+
+// Recuperar a preferência quando a página é aberta.
+
+function carregarIdioma() {
+
+  const idioma = obterCookie("idioma");
+
+  if (idioma) {
+    document.querySelector("#idioma").value = idioma;
+  }
+}
+
+
+// ----------------------------------------------------
+// FUNÇÕES AUXILIARES
+// ----------------------------------------------------
+
+function mostrar(data) {
+
+  document.querySelector("#output").textContent =
+    JSON.stringify(data, null, 2);
+}
+
+
+function verCookies() {
+
+  const cookies = document.cookie;
+
+  if (cookies) {
+
+    document.querySelector("#output").textContent =
+      "Cookies visíveis ao JavaScript: " + cookies;
+
+  } else {
+
+    document.querySelector("#output").textContent =
+      "Não existem cookies acessíveis ao JavaScript.";
+  }
+}
+
+function verToken() {
+
+  if (!token) {
+    mostrar({
+      error: "Não existe nenhum token. Faça primeiro o login com Bearer."
+    });
+    return;
+  }
+
+  try {
+
+    // Um JWT tem três partes separadas por pontos:
+    // HEADER.PAYLOAD.SIGNATURE
+
+    const partes = token.split(".");
+
+    if (partes.length !== 3) {
+      throw new Error("Token JWT inválido");
+    }
+
+    const headerCodificado = partes[0];
+    const payloadCodificado = partes[1];
+    const signature = partes[2];
+
+
+    // Descodificar HEADER
+    const header = JSON.parse(
+      atob(
+        headerCodificado
+          .replace(/-/g, "+")
+          .replace(/_/g, "/")
+      )
+    );
+
+
+    // Descodificar PAYLOAD
+    const payload = JSON.parse(
+      atob(
+        payloadCodificado
+          .replace(/-/g, "+")
+          .replace(/_/g, "/")
+      )
+    );
+
+
+    // Mostrar as várias partes
+    mostrar({
+
+      "JWT completo": token,
+
+      "1. HEADER (codificado)": headerCodificado,
+      "1. HEADER (descodificado)": header,
+
+      "2. PAYLOAD (codificado)": payloadCodificado,
+      "2. PAYLOAD (descodificado)": payload,
+
+      "3. SIGNATURE": signature
+
+    });
+
+  } catch (erro) {
+
+    mostrar({
+      error: "Não foi possível descodificar o token."
+    });
+
+  }
+}
+
+
+// ----------------------------------------------------
+// INICIALIZAÇÃO DA PÁGINA
+// ----------------------------------------------------
+
+// Quando a página abre, verifica se existe
+// uma preferência de idioma anteriormente guardada.
+
+carregarIdioma();
+
+</script>
+
+</body>
+</html>
